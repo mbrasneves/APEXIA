@@ -1,0 +1,1867 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>APEX IA — Aprendizagem Personalizada Exploratória com IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   APEX IA — Editorial landing
+   Palette: warm ink / cream paper / coral accent / moss / ochre
+   ========================================================= */
+
+:root {
+  --ink:       #15140F;
+  --ink-2:     #242119;
+  --paper:     #F2ECE0;
+  --paper-2:   #EAE3D3;
+  --paper-3:   #DCD2BD;
+  --accent:    #E8472C;
+  --accent-2:  #C73B22;
+  --moss:      #4A5D3A;
+  --moss-2:    #334028;
+  --ochre:     #C89B3C;
+  --muted:     #7A7160;
+  --line:      rgba(21,20,15,0.14);
+  --line-strong: rgba(21,20,15,0.35);
+  --line-light: rgba(242,236,224,0.18);
+
+  --display: "Instrument Serif", "Times New Roman", serif;
+  --body: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --radius: 2px;
+  --max: 1240px;
+  --pad-x: clamp(20px, 4vw, 64px);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--body);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01", "liga", "dlig";
+  overflow-x: hidden;
+}
+
+::selection { background: var(--accent); color: var(--paper); }
+
+em { font-style: italic; font-family: var(--display); font-weight: 400; }
+
+a { color: inherit; text-decoration: none; }
+
+/* ===== Grain overlay ===== */
+.grain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  opacity: 0.035; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* ===== Nav ===== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px var(--pad-x);
+  z-index: 100;
+  backdrop-filter: blur(14px) saturate(1.1);
+  background: color-mix(in oklab, var(--paper) 78%, transparent);
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.nav__brand { display: flex; align-items: center; gap: 10px; }
+.nav__mark { display: inline-flex; color: var(--accent); }
+.nav__title { font-family: var(--display); font-size: 20px; letter-spacing: 0.01em; }
+.nav__v { font-family: var(--mono); font-size: 11px; color: var(--muted); padding-top: 4px; }
+.nav__links { display: flex; gap: 22px; }
+.nav__links a { color: var(--ink); opacity: 0.7; transition: opacity 0.2s, color 0.2s; position: relative; }
+.nav__links a:hover { opacity: 1; color: var(--accent); }
+.nav__meta { display: flex; align-items: center; gap: 10px; color: var(--muted); font-family: var(--mono); font-size: 11px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: inline-block; }
+.dot--live { animation: pulse 1.8s infinite ease-in-out; }
+@keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.7); } }
+
+@media (max-width: 860px) {
+  .nav__links { display: none; }
+}
+
+/* ===== Hero ===== */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  padding: 140px var(--pad-x) 80px;
+  display: flex; flex-direction: column; justify-content: center;
+  max-width: var(--max); margin: 0 auto;
+  overflow: hidden;
+}
+.hero__canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+.hero > *:not(.hero__canvas) { position: relative; z-index: 2; }
+
+.hero__overline { display: flex; gap: 10px; margin-bottom: 28px; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+  padding: 6px 12px; border: 1px solid var(--line-strong);
+  background: var(--paper); color: var(--ink);
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+.badge--ghost { background: transparent; color: var(--muted); }
+
+.hero__title {
+  font-family: var(--display);
+  font-size: clamp(60px, 13vw, 190px);
+  line-height: 0.93;
+  letter-spacing: -0.02em;
+  font-weight: 400;
+  margin: 0 0 36px;
+  overflow: hidden;
+}
+.hero__line { display: block; overflow: hidden; }
+.hero__line > * { display: inline-block; }
+.hero__line em { color: var(--accent); font-style: italic; }
+
+.hero__lede {
+  font-size: clamp(18px, 2vw, 22px);
+  max-width: 58ch;
+  margin: 0 0 40px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.hl { background: linear-gradient(180deg, transparent 65%, color-mix(in oklab, var(--accent) 35%, transparent) 65%); padding: 0 2px; }
+
+.hero__cta { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 80px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 16px 22px; border-radius: 999px;
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: all 0.25s ease;
+  border: 1px solid transparent;
+}
+.btn--primary { background: var(--ink); color: var(--paper); }
+.btn--primary:hover { background: var(--accent); transform: translateY(-2px); }
+.btn--primary span { transition: transform 0.25s; }
+.btn--primary:hover span { transform: translateY(3px); }
+.btn--ghost { border-color: var(--line-strong); color: var(--ink); }
+.btn--ghost:hover { background: var(--ink); color: var(--paper); }
+
+.hero__foot {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px; padding-top: 28px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+}
+.hero__foot > div { display: flex; flex-direction: column; gap: 4px; }
+.lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 720px) {
+  .hero__foot { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ===== Marquee ===== */
+.marquee {
+  overflow: hidden; white-space: nowrap;
+  padding: 22px 0;
+  background: var(--ink); color: var(--paper);
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+}
+.marquee__track {
+  display: inline-flex; gap: 40px;
+  animation: marquee 45s linear infinite;
+  font-family: var(--display); font-size: 26px; font-style: italic;
+  padding-left: 40px;
+}
+.marquee__track span:nth-child(even) { color: var(--accent); font-style: normal; font-size: 18px; }
+@keyframes marquee { to { transform: translateX(-50%); } }
+
+/* ===== Sections ===== */
+.section {
+  padding: 120px var(--pad-x);
+  max-width: var(--max); margin: 0 auto;
+  position: relative;
+}
+.section--ink { background: var(--ink); color: var(--paper); max-width: none; margin: 0; }
+.section--ink > * { max-width: var(--max); margin-left: auto; margin-right: auto; }
+.section--paper-alt { background: var(--paper-2); max-width: none; margin: 0; }
+.section--paper-alt > * { max-width: var(--max); margin-left: auto; margin-right: auto; }
+
+.section__head {
+  display: flex; align-items: baseline; gap: 16px;
+  margin-bottom: 40px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.section--ink .section__head, .section__head--light { border-bottom-color: var(--line-light); }
+.section__num { font-family: var(--mono); font-size: 13px; color: var(--accent); letter-spacing: 0.1em; }
+.section__kicker { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.section--ink .section__kicker { color: var(--paper-3); }
+
+/* Headings */
+.h2 {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(42px, 6.5vw, 86px);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  margin: 0 0 44px;
+  max-width: 22ch;
+  padding-bottom: 0.12em;
+}
+.h2--light { color: var(--paper); }
+.h2 em { color: var(--accent); }
+
+.h3 { font-family: var(--display); font-size: clamp(24px, 3vw, 36px); line-height: 1.1; letter-spacing: -0.01em; font-weight: 400; margin: 0 0 16px; }
+
+.lede {
+  font-size: clamp(18px, 1.6vw, 21px);
+  max-width: 62ch; color: var(--ink-2); margin: 0 0 60px;
+}
+.lede--light { color: color-mix(in oklab, var(--paper) 85%, transparent); }
+
+.muted { color: var(--muted); }
+.section--ink .muted { color: color-mix(in oklab, var(--paper) 60%, transparent); }
+.mono { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.nowrap { white-space: nowrap; }
+
+/* Two column */
+.twocol { display: grid; grid-template-columns: 1fr 1.4fr; gap: clamp(32px, 6vw, 96px); }
+.twocol__body > p { margin: 0 0 18px; font-size: 18px; max-width: 58ch; }
+.twocol__body > p + p { margin-top: 18px; }
+@media (max-width: 860px) { .twocol { grid-template-columns: 1fr; } }
+
+.callout {
+  padding: 24px;
+  border-left: 2px solid var(--accent);
+  background: var(--paper-2);
+  margin-top: 28px;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.callout__tag { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+
+/* Problem block */
+.problem {
+  margin-top: 80px;
+  display: grid; grid-template-columns: 1fr 80px 1fr;
+  align-items: stretch; gap: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.problem__col { padding: 40px; }
+.problem__col--accent { background: var(--ink); color: var(--paper); }
+.problem__col--accent .muted { color: color-mix(in oklab, var(--paper) 55%, transparent); }
+.problem__label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+.problem__h { font-family: var(--display); font-size: 30px; font-weight: 400; letter-spacing: -0.01em; line-height: 1.1; margin: 0 0 20px; }
+.problem__arrow { display: flex; align-items: center; justify-content: center; color: var(--ink); border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+.problem__col--accent + .problem__arrow, .problem .problem__arrow { color: var(--accent); }
+
+.bullets { list-style: none; padding: 0; margin: 0 0 20px; }
+.bullets li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px dashed var(--line); font-size: 15px; }
+.problem__col--accent .bullets li { border-bottom-color: var(--line-light); }
+.bullets .num { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+
+@media (max-width: 860px) {
+  .problem { grid-template-columns: 1fr; }
+  .problem__arrow { transform: rotate(90deg); padding: 20px 0; border: none; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+}
+
+/* Pillars */
+.pillars {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 0; margin-top: 60px;
+  border-top: 1px solid var(--line-light);
+}
+.pillar {
+  padding: 40px 28px 32px;
+  border-right: 1px solid var(--line-light);
+  border-bottom: 1px solid var(--line-light);
+  position: relative;
+  transition: background 0.4s ease;
+}
+.pillar:last-child { border-right: none; }
+.pillar:hover { background: color-mix(in oklab, var(--accent) 10%, transparent); }
+.pillar__num {
+  font-family: var(--display); font-style: italic; font-size: 60px;
+  color: var(--accent); display: block; margin-bottom: 16px; line-height: 0.8;
+}
+.pillar h4 { font-family: var(--display); font-size: 26px; font-weight: 400; margin: 0 0 4px; letter-spacing: -0.01em; }
+.pillar p { font-size: 14px; margin: 10px 0 0; color: color-mix(in oklab, var(--paper) 80%, transparent); }
+.pillar .muted { margin-top: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; }
+
+@media (max-width: 900px) { .pillars { grid-template-columns: repeat(2, 1fr); } .pillar:nth-child(2) { border-right: none; } }
+@media (max-width: 520px) { .pillars { grid-template-columns: 1fr; } .pillar { border-right: none !important; } }
+
+/* ===== Triade ===== */
+.triade-section { padding-bottom: 160px; }
+.triade {
+  position: relative;
+  margin: 80px auto 0;
+  width: 100%;
+  max-width: 900px;
+  aspect-ratio: 600 / 540;
+}
+.triade__svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.triade__poly { animation: drawtri 2.6s cubic-bezier(0.22,1,0.36,1) forwards; animation-play-state: paused; }
+.triade.in-view .triade__poly { animation-play-state: running; }
+.triade__orbit { opacity: 0; animation: pop 0.6s ease forwards; }
+.triade__orbit:nth-child(2) { animation-delay: 0.6s; }
+.triade__orbit:nth-child(3) { animation-delay: 1.0s; }
+.triade__orbit:nth-child(4) { animation-delay: 1.4s; }
+.triade.in-view .triade__orbit { opacity: 0; animation-delay: inherit; }
+.triade__center { animation: pop 0.5s 1.8s ease forwards; opacity: 0; }
+
+@keyframes drawtri { to { stroke-dashoffset: 0; } }
+@keyframes pop { 0% { opacity: 0; transform: scale(0.3); transform-origin: center; } 100% { opacity: 1; transform: scale(1); } }
+
+.vertex {
+  position: absolute; width: min(260px, 32%);
+  font-size: 13px;
+}
+.vertex--top { left: 50%; top: 0; transform: translate(-50%, -20%); text-align: center; }
+.vertex--right { right: 0; bottom: 2%; text-align: left; }
+.vertex--left { left: 0; bottom: 2%; text-align: right; }
+.vertex__tag {
+  display: inline-block; font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 6px 12px; background: var(--ink); color: var(--paper);
+  border-radius: 999px; margin-bottom: 12px;
+}
+.vertex__list { list-style: none; padding: 0; margin: 0; }
+.vertex__list li {
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--line);
+  line-height: 1.35;
+}
+.vertex__list li:last-child { border-bottom: none; }
+.vertex--left .vertex__list li { border-bottom-color: var(--line); }
+
+.triade__core {
+  position: absolute; left: 50%; top: 62%; transform: translate(-50%, -50%);
+  width: 260px; text-align: center;
+  padding: 20px 18px;
+  background: var(--accent); color: var(--paper);
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  display: grid; place-items: center;
+  box-shadow: 0 24px 60px -20px rgba(232,71,44,0.55);
+  animation: breathe 6s infinite ease-in-out;
+}
+@keyframes breathe { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-50%,-50%) scale(1.04); } }
+.triade__core-inner p { font-family: var(--display); font-size: 22px; line-height: 1.1; margin: 0; }
+.triade__core-inner em { color: var(--ink); }
+.triade__core-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 10px; opacity: 0.85; }
+
+@media (max-width: 760px) {
+  .triade { aspect-ratio: auto; max-width: 520px; }
+  .triade__svg { display: none; }
+  .vertex { position: relative; width: 100%; left: 0; top: 0; transform: none; text-align: left !important; margin-bottom: 36px; }
+  .triade__core { position: relative; transform: none; left: 0; top: 0; margin: 24px auto; }
+}
+
+/* ===== Contexts ===== */
+.contexts {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; border-top: 1px solid var(--line);
+}
+.context { padding: 40px; border-bottom: 1px solid var(--line); }
+.context--yes { border-right: 1px solid var(--line); background: var(--paper-2); }
+.context--no { background: var(--ink); color: var(--paper); }
+.context--no .muted { color: color-mix(in oklab, var(--paper) 60%, transparent); }
+.context__head { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.context__icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--mono); font-size: 16px;
+}
+.context--yes .context__icon { background: var(--moss); color: var(--paper); }
+.context--no .context__icon { background: var(--accent); color: var(--paper); }
+.context h3 { font-family: var(--display); font-size: 28px; font-weight: 400; letter-spacing: -0.01em; margin: 0; }
+.context ul { list-style: none; padding: 0; margin: 0; }
+.context li { padding: 12px 0; border-bottom: 1px dashed var(--line); font-size: 15px; line-height: 1.4; }
+.context--no li { border-bottom-color: var(--line-light); }
+
+@media (max-width: 720px) { .contexts { grid-template-columns: 1fr; } .context--yes { border-right: none; } }
+
+.freq {
+  margin-top: 60px;
+  display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center;
+  padding: 40px;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+}
+.freq__num {
+  font-family: var(--display); font-size: clamp(96px, 16vw, 180px); line-height: 0.8;
+  color: var(--accent);
+  letter-spacing: -0.04em;
+  font-style: italic;
+}
+.freq__num span { font-style: normal; color: var(--ink); }
+.freq__label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: block; }
+.freq__body p { font-size: 18px; margin: 0; max-width: 50ch; }
+
+@media (max-width: 640px) { .freq { grid-template-columns: 1fr; gap: 8px; padding: 28px; } }
+
+/* ===== Checklist ===== */
+.checklist {
+  margin-top: 40px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 28px;
+}
+.checklist__head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  gap: 20px; flex-wrap: wrap;
+  padding-bottom: 20px; border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+  color: var(--muted); font-size: 14px;
+}
+.check { list-style: none; padding: 0; margin: 0; counter-reset: check; }
+.check li {
+  display: grid; grid-template-columns: auto 32px 1fr; gap: 20px; align-items: center;
+  padding: 22px 4px;
+  border-bottom: 1px dashed var(--line);
+  counter-increment: check;
+}
+.check li::before {
+  content: counter(check, decimal-leading-zero);
+  font-family: var(--mono); font-size: 12px;
+  color: var(--accent); letter-spacing: 0.1em;
+}
+.check li:last-child { border-bottom: none; }
+.check__box {
+  width: 24px; height: 24px; border: 1.5px solid var(--ink);
+  display: inline-block; border-radius: 3px;
+  position: relative;
+  transition: background 0.4s, transform 0.3s;
+}
+.check__box::after {
+  content: "✓"; position: absolute; inset: 0;
+  display: grid; place-items: center;
+  color: var(--paper); font-size: 14px; font-weight: 700;
+  opacity: 0; transform: scale(0.2); transition: all 0.4s ease;
+}
+.check li.in-view .check__box { background: var(--accent); border-color: var(--accent); }
+.check li.in-view .check__box::after { opacity: 1; transform: scale(1); }
+
+/* ===== Mini-Brief ===== */
+.brief-wrap { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(32px, 5vw, 72px); align-items: start; margin-top: 40px; }
+@media (max-width: 900px) { .brief-wrap { grid-template-columns: 1fr; } }
+
+.brief {
+  background: var(--paper);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 30px 70px -40px rgba(21,20,15,0.35);
+  position: relative;
+  overflow: hidden;
+  transform: rotate(-0.6deg);
+  transition: transform 0.4s ease;
+}
+.brief:hover { transform: rotate(0deg) translateY(-4px); }
+.brief__header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--paper-2);
+  position: relative;
+}
+.brief__meta { display: flex; align-items: center; gap: 14px; }
+.brief__stamp {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 3px 10px; transform: rotate(-3deg);
+}
+.brief__fold {
+  position: absolute; top: 0; right: 0;
+  width: 28px; height: 28px;
+  background: linear-gradient(225deg, var(--paper-3) 0%, var(--paper-3) 49%, transparent 50%);
+  filter: drop-shadow(-2px 2px 2px rgba(0,0,0,0.08));
+}
+.brief__body { padding: 24px; }
+.brief__row { padding: 18px 0; border-bottom: 1px dashed var(--line); }
+.brief__row:last-child { border-bottom: none; }
+.brief__lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 8px; }
+.brief__text { font-family: var(--display); font-size: 22px; line-height: 1.25; margin: 0 0 6px; color: var(--ink); }
+.brief__text:last-child { margin-bottom: 0; }
+
+/* typewriter — one row shows a cursor at a time (driven by JS adding .typing class) */
+.brief__text[data-type] {
+  position: relative;
+}
+
+.brief__footer {
+  padding: 18px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--paper-2);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; color: var(--muted);
+  gap: 14px;
+}
+
+.brief-aside .h3 { margin-top: 20px; }
+.brief-keys { display: grid; gap: 2px; margin-top: 24px; }
+.key {
+  display: grid; grid-template-columns: 48px 1fr; gap: 16px; align-items: start;
+  padding: 20px 4px;
+  border-top: 1px solid var(--line);
+}
+.key:last-child { border-bottom: 1px solid var(--line); }
+.key__n { font-family: var(--mono); font-size: 12px; color: var(--accent); grid-row: span 2; }
+.key strong { font-family: var(--display); font-size: 22px; font-weight: 400; letter-spacing: -0.01em; display: block; }
+.key p { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
+
+/* ===== Phases / Timeline ===== */
+.phases {
+  position: relative;
+  margin-top: 60px;
+  padding-left: 80px;
+}
+.phases__rail {
+  position: absolute;
+  left: 32px; top: 0; bottom: 0;
+  width: 2px; background: var(--line-light);
+}
+.phases__rail-fill {
+  position: absolute; inset: 0 0 auto 0;
+  background: linear-gradient(180deg, var(--accent) 0%, var(--ochre) 100%);
+  height: 0%;
+  transition: height 0.1s linear;
+}
+
+.phase {
+  position: relative;
+  padding: 40px 0;
+  border-bottom: 1px solid var(--line-light);
+}
+.phase:last-child { border-bottom: none; }
+
+.phase__marker {
+  position: absolute;
+  left: -80px; top: 44px;
+  width: 64px; display: flex; align-items: center; gap: 12px;
+}
+.phase__dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--ink); border: 2px solid var(--paper-3);
+  transition: all 0.3s ease;
+}
+.phase.active .phase__dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 6px color-mix(in oklab, var(--accent) 20%, transparent); }
+.phase__num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--ochre); }
+
+.phase__title { font-family: var(--display); font-weight: 400; font-size: clamp(32px, 4.5vw, 56px); letter-spacing: -0.015em; line-height: 1; margin: 0 0 10px; color: var(--paper); }
+.phase__sub { color: color-mix(in oklab, var(--paper) 70%, transparent); max-width: 60ch; font-size: 17px; margin: 0 0 32px; }
+
+.phase__grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line-light);
+  border: 1px solid var(--line-light);
+}
+.role { padding: 24px; background: var(--ink); }
+.role__tag {
+  display: inline-block;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+.role--aluno .role__tag { background: var(--accent); color: var(--paper); }
+.role--prof  .role__tag { background: var(--ochre); color: var(--ink); }
+.role--ia    .role__tag { background: var(--moss); color: var(--paper); }
+
+.role ul { list-style: none; padding: 0; margin: 0; }
+.role li {
+  position: relative;
+  padding: 8px 0 8px 18px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: color-mix(in oklab, var(--paper) 88%, transparent);
+  border-bottom: 1px dashed var(--line-light);
+}
+.role li:last-child { border-bottom: none; }
+.role li::before {
+  content: ""; position: absolute; left: 0; top: 16px;
+  width: 8px; height: 1px; background: currentColor; opacity: 0.5;
+}
+
+@media (max-width: 860px) {
+  .phase__grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 700px) {
+  .phases { padding-left: 40px; }
+  .phases__rail { left: 12px; }
+  .phase__marker { left: -40px; width: 32px; }
+  .phase__num { display: none; }
+}
+
+/* ===== Avaliação ===== */
+.eval { margin-top: 60px; padding: 40px 0; border-top: 1px solid var(--line); }
+.eval__tag { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; display: inline-block; }
+
+.eval__grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+  margin-top: 32px; border: 1px solid var(--line);
+}
+.dim {
+  padding: 28px 20px;
+  border-right: 1px solid var(--line);
+  display: flex; flex-direction: column;
+  min-height: 220px;
+  position: relative;
+  background: var(--paper);
+  transition: background 0.3s;
+}
+.dim:last-child { border-right: none; }
+.dim:hover { background: var(--paper-2); }
+.dim h4 { font-family: var(--display); font-size: 22px; font-weight: 400; letter-spacing: -0.01em; margin: 0 0 12px; line-height: 1.1; }
+.dim p { font-size: 14px; color: var(--ink-2); margin: 0; flex: 1; }
+.dim__phase { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; color: var(--accent); margin-top: 20px; padding-top: 14px; border-top: 1px dashed var(--line); }
+
+@media (max-width: 960px) { .eval__grid { grid-template-columns: repeat(2, 1fr); } .dim { border-right: none; border-bottom: 1px solid var(--line); } }
+@media (max-width: 560px) { .eval__grid { grid-template-columns: 1fr; } }
+
+.weights { margin-top: 36px; }
+.weights__bar {
+  height: 72px; display: flex;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background: var(--paper);
+}
+.weights__seg {
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em;
+  width: 0; transition: width 1.2s cubic-bezier(0.22,1,0.36,1);
+  position: relative;
+  color: var(--paper);
+}
+.weights__seg span { opacity: 0; transition: opacity 0.4s 0.9s; }
+.weights.in-view .weights__seg { width: var(--w); }
+.weights.in-view .weights__seg span { opacity: 1; }
+.weights__seg--1 { background: var(--accent); }
+.weights__seg--2 { background: var(--ochre); color: var(--ink); }
+.weights__seg--3 { background: var(--moss); }
+.weights__seg--4 { background: var(--ink); }
+
+.weights__legend {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+  margin-top: 24px;
+}
+.wlg { font-size: 14px; }
+.wlg__sw { display: inline-block; width: 36px; height: 6px; border-radius: 1px; margin-bottom: 10px; }
+.wlg--1 .wlg__sw { background: var(--accent); }
+.wlg--2 .wlg__sw { background: var(--ochre); }
+.wlg--3 .wlg__sw { background: var(--moss); }
+.wlg--4 .wlg__sw { background: var(--ink); }
+.wlg strong { font-family: var(--display); font-size: 20px; font-weight: 400; letter-spacing: -0.01em; display: block; margin-bottom: 4px; }
+.wlg p { color: var(--muted); margin: 0; }
+
+@media (max-width: 860px) { .weights__legend { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .weights__legend { grid-template-columns: 1fr; } }
+
+/* ===== Prompts / guiao ===== */
+.prompts { margin-top: 40px; }
+.prompts__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--line); margin-top: 28px; }
+.prompt { padding: 32px 28px; border-right: 1px solid var(--line); background: var(--paper); position: relative; }
+.prompt:last-child { border-right: none; }
+.prompt__kind {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent);
+  display: block; margin-bottom: 18px;
+}
+.prompt__body {
+  font-family: var(--display); font-size: 22px;
+  line-height: 1.3; margin: 0;
+  position: relative; padding-left: 18px;
+}
+.prompt__body::before { content: "“"; position: absolute; left: -4px; top: -16px; font-family: var(--display); font-size: 64px; color: var(--accent); line-height: 1; }
+
+@media (max-width: 860px) { .prompts__grid { grid-template-columns: 1fr; } .prompt { border-right: none; border-bottom: 1px solid var(--line); } }
+
+.rule {
+  margin-top: 60px;
+  padding: 36px;
+  background: var(--ink); color: var(--paper);
+  display: grid; grid-template-columns: 1fr 1.6fr; gap: 40px; align-items: center;
+}
+.rule__meter {
+  height: 14px; background: color-mix(in oklab, var(--paper) 15%, transparent);
+  position: relative; overflow: hidden;
+}
+.rule__meter-fill {
+  position: absolute; inset: 0; width: 0;
+  background: var(--accent);
+  transition: width 1.4s cubic-bezier(0.22,1,0.36,1);
+}
+.rule.in-view .rule__meter-fill { width: 66.66%; }
+.rule__meter-tick { position: absolute; top: -6px; bottom: -6px; width: 2px; background: var(--paper); }
+.rule__text { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; }
+.rule__n { font-family: var(--display); font-size: 120px; line-height: 0.8; color: var(--accent); letter-spacing: -0.04em; }
+.rule__text p { margin: 0; font-size: 19px; max-width: 42ch; }
+
+@media (max-width: 800px) { .rule { grid-template-columns: 1fr; } .rule__n { font-size: 80px; } }
+
+/* Risk grid */
+.risk-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 0;
+  margin-top: 40px;
+  border: 1px solid var(--line);
+}
+.risk { padding: 36px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--paper); }
+.risk:nth-child(2n) { border-right: none; }
+.risk:nth-last-child(-n+2) { border-bottom: none; }
+.risk h4 {
+  font-family: var(--display); font-size: 28px; font-weight: 400;
+  letter-spacing: -0.01em; margin: 0 0 14px;
+}
+.risk h4::before {
+  content: "◆"; color: var(--accent); margin-right: 10px; font-size: 14px; vertical-align: middle;
+}
+.risk p { margin: 0 0 12px; font-size: 15px; }
+.risk p:last-child { margin-bottom: 0; }
+
+@media (max-width: 760px) { .risk-grid { grid-template-columns: 1fr; } .risk { border-right: none; border-bottom: 1px solid var(--line); } .risk:last-child { border-bottom: none; } }
+
+/* Footer */
+.foot {
+  padding: 80px var(--pad-x) 60px;
+  background: var(--ink); color: var(--paper);
+  display: grid; grid-template-columns: auto 1fr auto; gap: 40px; align-items: start;
+  max-width: none;
+  border-top: 1px solid var(--accent);
+}
+.foot__mark { display: flex; align-items: center; gap: 12px; font-family: var(--display); font-size: 24px; color: var(--accent); }
+.foot__body p { margin: 0 0 8px; max-width: 56ch; }
+.foot__top {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  display: inline-flex; gap: 8px; align-items: center;
+  padding: 10px 16px; border: 1px solid var(--line-light);
+  border-radius: 999px; transition: all 0.2s;
+}
+.foot__top:hover { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+
+@media (max-width: 760px) { .foot { grid-template-columns: 1fr; } }
+
+/* ===== Reveal ===== */
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1); }
+.reveal.in-view { opacity: 1; transform: translateY(0); }
+
+/* Hero animated line mask */
+.hero__line > .word { display: inline-block; transform: translateY(100%); opacity: 0; animation: riseWord 1s cubic-bezier(0.22,1,0.36,1) forwards; }
+.hero__line:nth-child(1) .word { animation-delay: 0.15s; }
+.hero__line:nth-child(2) .word { animation-delay: 0.30s; }
+.hero__line:nth-child(3) .word { animation-delay: 0.45s; }
+.hero__line:nth-child(4) .word { animation-delay: 0.60s; }
+@keyframes riseWord { to { transform: translateY(0); opacity: 1; } }
+
+</style>
+</head>
+<body>
+
+<!-- NOISE / GRAIN OVERLAY -->
+<div class="grain" aria-hidden="true"></div>
+
+<!-- NAV -->
+<header class="nav">
+  <a class="nav__brand" href="#top">
+    <span class="nav__mark">
+      <svg viewBox="0 0 24 24" width="22" height="22"><polygon points="12,3 22,20 2,20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="12" cy="3" r="1.6" fill="currentColor"/><circle cx="22" cy="20" r="1.6" fill="currentColor"/><circle cx="2" cy="20" r="1.6" fill="currentColor"/></svg>
+    </span>
+    <span class="nav__title">APEX IA</span>
+    <span class="nav__v">v2.0</span>
+  </a>
+  <nav class="nav__links">
+    <a href="#abordagem">Abordagem</a>
+    <a href="#triade">Tríade</a>
+    <a href="#fases">5 Fases</a>
+    <a href="#mini-brief">Mini-Brief</a>
+    <a href="#avaliacao">Avaliação</a>
+    <a href="#guiao">Guião</a>
+  </nav>
+  <div class="nav__meta">
+    <span class="dot dot--live"></span>
+    <span>Marco Neves AI · 2026</span>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <canvas id="hero-canvas" class="hero__canvas"></canvas>
+
+  <div class="hero__overline">
+    <span class="badge">Proposta pedagógica · 2026</span>
+    <span class="badge badge--ghost">Versão 2.0</span>
+  </div>
+
+  <h1 class="hero__title">
+    <span class="hero__line"><em>Aprendizagem</em></span>
+    <span class="hero__line">Personalizada</span>
+    <span class="hero__line">Exploratória</span>
+    <span class="hero__line">com <em>IA</em></span>
+  </h1>
+
+  <p class="hero__lede">
+    Uma abordagem pedagógica concebida para ambientes onde a IA Generativa tem um
+    <span class="hl">papel ativo e estrutural</span> — e não meramente instrumental.
+    O aluno constrói o seu percurso. O professor desenha o ambiente.
+    A IA é um interlocutor, nunca uma autoridade.
+  </p>
+
+  <div class="hero__cta">
+    <a href="#abordagem" class="btn btn--primary">Explorar a abordagem<span>↓</span></a>
+    <a href="#fases" class="btn btn--ghost">Ver as 5 fases</a>
+  </div>
+
+  <div class="hero__foot">
+    <div><span class="lbl">Origem</span><span>Marco Neves AI</span></div>
+    <div><span class="lbl">Contexto</span><span>IA Generativa em sala de aula</span></div>
+    <div><span class="lbl">Aplicação</span><span>1–2 unidades por ano letivo</span></div>
+    <div><span class="lbl">Licença</span><span>Partilhável com autoria</span></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee__track">
+    <span>Autodirigida</span><span>◆</span>
+    <span>Construtivista</span><span>◆</span>
+    <span>Baseada em problemas</span><span>◆</span>
+    <span>Conectivista</span><span>◆</span>
+    <span>Mediação da IA</span><span>◆</span>
+    <span>Pensamento crítico</span><span>◆</span>
+    <span>Avaliação formativa</span><span>◆</span>
+    <span>Literacia para a IA</span><span>◆</span>
+    <span>Autodirigida</span><span>◆</span>
+    <span>Construtivista</span><span>◆</span>
+    <span>Baseada em problemas</span><span>◆</span>
+    <span>Conectivista</span><span>◆</span>
+    <span>Mediação da IA</span><span>◆</span>
+    <span>Pensamento crítico</span><span>◆</span>
+    <span>Avaliação formativa</span><span>◆</span>
+    <span>Literacia para a IA</span><span>◆</span>
+  </div>
+</div>
+
+<!-- ABORDAGEM / O QUE É -->
+<section class="section" id="abordagem">
+  <div class="section__head">
+    <span class="section__num">01</span>
+    <span class="section__kicker">Enquadramento</span>
+  </div>
+  <div class="twocol">
+    <h2 class="h2 reveal">O que é a <em>APEX IA</em>?</h2>
+    <div class="twocol__body">
+      <p class="reveal">
+        A APEX IA é uma abordagem pedagógica onde os alunos constroem o seu percurso
+        de conhecimento de forma <strong>autónoma</strong>, orientados por um ponto de partida
+        definido pelo professor e apoiados por modelos de linguagem avançados.
+      </p>
+      <p class="reveal">
+        O professor exerce um papel de <strong>design pedagógico</strong>, monitorização ativa
+        e avaliação formativa ao longo de todo o processo. Não substitui outros modelos —
+        é uma abordagem <em>complementar</em>, deliberada, para momentos específicos
+        do calendário letivo.
+      </p>
+      <div class="callout reveal">
+        <span class="callout__tag">Nota de âmbito</span>
+        A APEX IA não é universal. A decisão de a utilizar é sempre do professor,
+        em função do contexto pedagógico. Pressupõe alunos com literacia para a IA desenvolvida,
+        acesso a dispositivos e modelos de linguagem, e clareza sobre os objetivos de avaliação.
+      </div>
+    </div>
+  </div>
+
+  <!-- PROBLEM → RESPONSE diagram -->
+  <div class="problem">
+    <div class="problem__col reveal">
+      <div class="problem__label">O problema que herdámos</div>
+      <h3 class="problem__h">Três pilares que a IA tornou frágeis</h3>
+      <ul class="bullets">
+        <li><span class="num">i.</span> Transmissão unidirecional de informação do professor para o aluno.</li>
+        <li><span class="num">ii.</span> Avaliação centrada em momentos únicos de teste individual.</li>
+        <li><span class="num">iii.</span> Pressuposto de que o acesso ao conhecimento é escasso.</li>
+      </ul>
+      <p class="muted">Uma arquitetura pedagógica concebida num contexto que já não existe.</p>
+    </div>
+
+    <div class="problem__arrow" aria-hidden="true">
+      <svg viewBox="0 0 120 24" width="100%" height="24">
+        <line x1="0" y1="12" x2="108" y2="12" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 4"/>
+        <polygon points="108,6 120,12 108,18" fill="currentColor"/>
+      </svg>
+    </div>
+
+    <div class="problem__col problem__col--accent reveal">
+      <div class="problem__label">A resposta da APEX IA</div>
+      <h3 class="problem__h">Condições para a autonomia cognitiva</h3>
+      <ul class="bullets">
+        <li><span class="num">a.</span> Gestão autónoma do conhecimento pelo aluno.</li>
+        <li><span class="num">b.</span> Pensamento crítico e formulação de perguntas relevantes.</li>
+        <li><span class="num">c.</span> IA como interlocutor ativo — nunca ferramenta passiva.</li>
+      </ul>
+      <p class="muted">Não é uma resposta total. É uma resposta a uma parte específica do problema.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FUNDAMENTOS PEDAGÓGICOS -->
+<section class="section section--ink" id="fundamentos">
+  <div class="section__head section__head--light">
+    <span class="section__num">02</span>
+    <span class="section__kicker">Fundamentos pedagógicos</span>
+  </div>
+  <h2 class="h2 h2--light reveal">Quatro tradições <em>articuladas</em>, nenhuma absorvida.</h2>
+  <p class="lede lede--light reveal">
+    A APEX IA convoca contributos de várias tradições pedagógicas e acrescenta-lhes uma mediação
+    explícita: a IA Generativa como <strong>terceiro vértice</strong> de uma relação que antes era bilateral.
+  </p>
+
+  <div class="pillars">
+    <article class="pillar reveal">
+      <span class="pillar__num">i</span>
+      <h4>Aprendizagem autodirigida</h4>
+      <p class="muted">Knowles, Zimmerman</p>
+      <p>Enquadra a autonomia e a autorregulação do percurso de aprendizagem.</p>
+    </article>
+    <article class="pillar reveal">
+      <span class="pillar__num">ii</span>
+      <h4>Construtivismo social</h4>
+      <p class="muted">Vygotsky</p>
+      <p>O conhecimento constrói-se pela interação e pela mediação — papel que a IA pode exercer de forma adaptativa.</p>
+    </article>
+    <article class="pillar reveal">
+      <span class="pillar__num">iii</span>
+      <h4>Baseada em problemas</h4>
+      <p class="muted">PBL / Project-based</p>
+      <p>Fundamenta a dimensão de produção de conhecimento e de partilha entre pares.</p>
+    </article>
+    <article class="pillar reveal">
+      <span class="pillar__num">iv</span>
+      <h4>Conectivismo</h4>
+      <p class="muted">Siemens</p>
+      <p>Avaliar relevância e fiabilidade num ecossistema heterogéneo é, em si, uma competência central.</p>
+    </article>
+  </div>
+</section>
+
+<!-- TRIADE -->
+<section class="section triade-section" id="triade">
+  <div class="section__head">
+    <span class="section__num">03</span>
+    <span class="section__kicker">Os três vértices</span>
+  </div>
+  <h2 class="h2 reveal">Uma relação <em>triangular</em>, nunca bilateral.</h2>
+  <p class="lede reveal">
+    A comunicação deixa de ser unidirecional ou bidirecional. Passa a ser multidirecional —
+    com a IA a interagir com o aluno em tempo real e o professor a monitorizar e intervir
+    nos momentos de maior valor pedagógico.
+  </p>
+
+  <div class="triade" id="triade-stage">
+    <svg class="triade__svg" viewBox="0 0 600 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <defs>
+        <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#E8472C"/>
+          <stop offset="100%" stop-color="#C89B3C"/>
+        </linearGradient>
+      </defs>
+      <polygon class="triade__poly" points="300,60 540,460 60,460" fill="none" stroke="url(#edge)" stroke-width="1.5" stroke-dasharray="900" stroke-dashoffset="900"/>
+      <circle class="triade__orbit" cx="300" cy="60" r="6" fill="#E8472C"/>
+      <circle class="triade__orbit" cx="540" cy="460" r="6" fill="#E8472C"/>
+      <circle class="triade__orbit" cx="60"  cy="460" r="6" fill="#E8472C"/>
+      <!-- center principle -->
+      <circle class="triade__center" cx="300" cy="326" r="3" fill="#15140F"/>
+    </svg>
+
+    <div class="vertex vertex--top" data-v="prof">
+      <div class="vertex__tag">Professor</div>
+      <ul class="vertex__list">
+        <li>Designer do ambiente de aprendizagem</li>
+        <li>Guardião da relevância curricular</li>
+        <li>Árbitro epistemológico</li>
+        <li>Facilitador formativo</li>
+        <li>Avaliador do processo e do produto</li>
+      </ul>
+    </div>
+
+    <div class="vertex vertex--right" data-v="ia">
+      <div class="vertex__tag">IA Generativa</div>
+      <ul class="vertex__list">
+        <li>Interlocutor adaptativo e disponível</li>
+        <li>Amplificador da exploração</li>
+        <li>Fonte a <em>interrogar</em>, não a seguir</li>
+        <li>Ferramenta de estruturação do pensamento</li>
+        <li>Parceiro de validação (com limites declarados)</li>
+      </ul>
+    </div>
+
+    <div class="vertex vertex--left" data-v="aluno">
+      <div class="vertex__tag">Aluno</div>
+      <ul class="vertex__list">
+        <li>Arquiteto do seu percurso</li>
+        <li>Interrogador ativo do conhecimento</li>
+        <li>Responsável pela validação crítica</li>
+        <li>Produtor de um produto com identidade própria</li>
+        <li>Avaliador reflexivo da sua experiência</li>
+      </ul>
+    </div>
+
+    <div class="triade__core">
+      <div class="triade__core-inner">
+        <span class="triade__core-label">Princípio fundamental</span>
+        <p>A IA é um <em>interlocutor</em>, não uma autoridade.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTEXTS -->
+<section class="section" id="contextos">
+  <div class="section__head">
+    <span class="section__num">04</span>
+    <span class="section__kicker">Quando aplicar</span>
+  </div>
+  <h2 class="h2 reveal">Não é uma receita <em>universal</em>.</h2>
+  <p class="lede reveal">
+    A APEX IA produz resultados consistentes em determinadas condições.
+    A sua aplicação em contextos inapropriados gera frustração e perda de controlo pedagógico.
+  </p>
+
+  <div class="contexts">
+    <div class="context context--yes reveal">
+      <div class="context__head">
+        <span class="context__icon">✓</span>
+        <h3>Contextos favoráveis</h3>
+      </div>
+      <ul>
+        <li>Unidades temáticas com amplitude para percursos diversificados</li>
+        <li>Alunos com autonomia e autorregulação mínimas desenvolvidas</li>
+        <li>Literacia para a IA validada pelo professor</li>
+        <li>Acesso estável a dispositivos e modelos de linguagem</li>
+        <li>Tempo disponível para acompanhamento formativo</li>
+        <li>Objetivos focados em competências transversais</li>
+      </ul>
+    </div>
+    <div class="context context--no reveal">
+      <div class="context__head">
+        <span class="context__icon">×</span>
+        <h3>Contextos a evitar</h3>
+      </div>
+      <ul>
+        <li>Primeiras unidades do ano, antes de estabelecer rotinas</li>
+        <li>Turmas sem experiência prévia com modelos de linguagem</li>
+        <li>Unidades com conteúdo muito específico e delimitado</li>
+        <li>Momentos de pressão sumativa sem espaço formativo</li>
+        <li>Infraestrutura tecnológica instável ou partilhada</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="freq reveal">
+    <div class="freq__num">1<span>–</span>2</div>
+    <div class="freq__body">
+      <div class="freq__label">Frequência recomendada</div>
+      <p>Unidades temáticas por ano letivo, em momentos em que o desenvolvimento da
+      autonomia e do pensamento crítico tem mais relevância do que a cobertura extensiva de conteúdo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LITERACIA -->
+<section class="section section--paper-alt" id="literacia">
+  <div class="section__head">
+    <span class="section__num">05</span>
+    <span class="section__kicker">Pré-requisitos</span>
+  </div>
+  <h2 class="h2 reveal">Literacia para a IA como <em>condição de entrada</em>.</h2>
+  <p class="lede reveal">
+    Aplicar a APEX IA com alunos sem essa base é pedagogicamente irresponsável. A literacia
+    para a IA, neste contexto, não é uma competência técnica — é uma combinação de compreensão
+    conceptual, capacidade de avaliação crítica e consciência das limitações dos sistemas.
+  </p>
+
+  <div class="checklist">
+    <div class="checklist__head">
+      <span class="mono">Checklist · v.2.0</span>
+      <span>Antes de aplicar a APEX IA, o professor deve validar que os alunos…</span>
+    </div>
+    <ol class="check">
+      <li class="reveal"><span class="check__box"></span><span>Compreendem que os modelos de linguagem geram respostas <em>prováveis</em> e não verdades verificadas.</span></li>
+      <li class="reveal"><span class="check__box"></span><span>Sabem que a IA pode apresentar informação <em>errada com confiança aparente</em> (alucinação).</span></li>
+      <li class="reveal"><span class="check__box"></span><span>Conseguem formular perguntas com contexto suficiente para obter respostas úteis.</span></li>
+      <li class="reveal"><span class="check__box"></span><span>Conhecem as diferenças entre modelos <em>com</em> e <em>sem</em> capacidade de raciocínio estruturado.</span></li>
+      <li class="reveal"><span class="check__box"></span><span>Entendem que a IA <em>não substitui</em> a validação por fontes primárias.</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- MINI-BRIEF -->
+<section class="section" id="mini-brief">
+  <div class="section__head">
+    <span class="section__num">06</span>
+    <span class="section__kicker">O ponto de partida</span>
+  </div>
+  <h2 class="h2 reveal">O <em>Mini-Brief</em> dá ao aluno contexto — <span class="nowrap">não conteúdo.</span></h2>
+  <p class="lede reveal">
+    O título sozinho é insuficiente para situar o aluno. O Mini-Brief resolve esse problema sem
+    resolver aquele que a APEX IA quer manter em aberto: o percurso de aprendizagem não está definido.
+  </p>
+
+  <div class="brief-wrap">
+    <!-- Sample brief card -->
+    <article class="brief" id="brief-card">
+      <header class="brief__header">
+        <div class="brief__meta">
+          <span class="mono">Mini-Brief</span>
+          <span class="brief__stamp">Exemplar</span>
+        </div>
+        <div class="brief__fold" aria-hidden="true"></div>
+      </header>
+      <div class="brief__body">
+        <div class="brief__row">
+          <span class="brief__lbl">01 · Tópico</span>
+          <p class="brief__text" data-type>Sustentabilidade Ambiental</p>
+        </div>
+        <div class="brief__row">
+          <span class="brief__lbl">02 · Contexto curricular</span>
+          <p class="brief__text" data-type>Este tema insere-se na componente de Cidadania e Desenvolvimento. Não há conteúdo pré-definido, mas há competências do perfil de saída que esta exploração deve desenvolver.</p>
+        </div>
+        <div class="brief__row">
+          <span class="brief__lbl">03 · Horizonte temporal</span>
+          <p class="brief__text" data-type>Seis aulas, com dois momentos de partilha intercalares: um no final da primeira semana, outro no início da terceira.</p>
+        </div>
+        <div class="brief__row">
+          <span class="brief__lbl">04 · Questões de ativação</span>
+          <p class="brief__text" data-type>“O que é que a tua geração pode fazer que as gerações anteriores não conseguiram?”</p>
+          <p class="brief__text" data-type>“Que parte deste tema te parece mais difícil de discutir em público?”</p>
+        </div>
+      </div>
+      <footer class="brief__footer">
+        <span class="mono">≤ meia página</span>
+        <span>Se precisa de mais do que isto, está a dar <em>conteúdo</em> e não <em>contexto</em>.</span>
+      </footer>
+    </article>
+
+    <aside class="brief-aside">
+      <h3 class="h3 reveal">Quatro elementos. Meia página.</h3>
+      <p class="reveal">O Mini-Brief tem uma estrutura canónica mas flexível. Cada elemento resolve uma função específica — tópico, quadro, tempo, mote.</p>
+      <div class="brief-keys">
+        <div class="key reveal"><span class="key__n">01</span><strong>Tópico</strong><p>Um domínio formulado de forma aberta — não uma pergunta, não uma afirmação.</p></div>
+        <div class="key reveal"><span class="key__n">02</span><strong>Contexto curricular</strong><p>Uma frase que situa o tópico no percurso formativo do aluno.</p></div>
+        <div class="key reveal"><span class="key__n">03</span><strong>Horizonte temporal</strong><p>O tempo disponível e os momentos intercalares de partilha.</p></div>
+        <div class="key reveal"><span class="key__n">04</span><strong>Questões de ativação</strong><p>Uma a duas perguntas abertas que não revelam o que o professor espera que se aprenda.</p></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- FASES -->
+<section class="section section--ink" id="fases">
+  <div class="section__head section__head--light">
+    <span class="section__num">07</span>
+    <span class="section__kicker">Estrutura da abordagem</span>
+  </div>
+  <h2 class="h2 h2--light reveal">Cinco fases. <em>Três vértices</em> simultâneos em cada uma.</h2>
+  <p class="lede lede--light reveal">
+    A tabela de cada fase descreve o que fazem os três vértices da relação pedagógica de forma
+    simultânea e articulada. Navegue pelas fases para ver cada configuração.
+  </p>
+
+  <!-- Vertical progressive timeline with scroll-linked bar -->
+  <div class="phases" id="phases">
+    <div class="phases__rail" aria-hidden="true">
+      <div class="phases__rail-fill" id="rail-fill"></div>
+    </div>
+
+    <!-- Phase 1 -->
+    <article class="phase reveal" data-phase="1">
+      <div class="phase__marker">
+        <span class="phase__dot"></span>
+        <span class="phase__num">01</span>
+      </div>
+      <div class="phase__content">
+        <h3 class="phase__title">Lançamento e orientação</h3>
+        <p class="phase__sub">O ponto de partida é partilhado, os critérios são declarados, a IA ainda não entra em cena.</p>
+        <div class="phase__grid">
+          <div class="role role--aluno">
+            <span class="role__tag">Aluno</span>
+            <ul>
+              <li>Lê e analisa o Mini-Brief</li>
+              <li>Regista o que já sabe</li>
+              <li>Formula as primeiras perguntas</li>
+              <li>Define o ponto de partida com a IA</li>
+            </ul>
+          </div>
+          <div class="role role--prof">
+            <span class="role__tag">Professor</span>
+            <ul>
+              <li>Apresenta e clarifica o Mini-Brief</li>
+              <li>Responde a dúvidas de contexto (não de conteúdo)</li>
+              <li>Identifica alunos que precisam de scaffolding</li>
+              <li>Comunica os critérios de avaliação formativa</li>
+            </ul>
+          </div>
+          <div class="role role--ia">
+            <span class="role__tag">IA Generativa</span>
+            <ul>
+              <li>Ainda não entra nesta fase</li>
+              <li>Apresentada como ferramenta disponível</li>
+              <li>Não substitui o pensamento inicial do aluno</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Phase 2 -->
+    <article class="phase reveal" data-phase="2">
+      <div class="phase__marker">
+        <span class="phase__dot"></span>
+        <span class="phase__num">02</span>
+      </div>
+      <div class="phase__content">
+        <h3 class="phase__title">Exploração inicial com a IA</h3>
+        <p class="phase__sub">O diálogo abre. O aluno interroga, o professor desafia, a IA devolve perguntas.</p>
+        <div class="phase__grid">
+          <div class="role role--aluno">
+            <span class="role__tag">Aluno</span>
+            <ul>
+              <li>Inicia diálogo com a IA a partir das perguntas</li>
+              <li>Explora conceitos, subtemas, áreas de interesse</li>
+              <li>Regista respostas e questões emergentes</li>
+              <li>Começa a definir o foco do seu percurso</li>
+            </ul>
+          </div>
+          <div class="role role--prof">
+            <span class="role__tag">Professor</span>
+            <ul>
+              <li>Circula e monitoriza registos</li>
+              <li>Deteta dependência excessiva da IA</li>
+              <li>Coloca desafios: <em>“Como sabes que isso é correto?”</em></li>
+              <li>Não fornece conteúdo — devolve perguntas</li>
+            </ul>
+          </div>
+          <div class="role role--ia">
+            <span class="role__tag">IA Generativa</span>
+            <ul>
+              <li>Adapta-se ao ritmo e nível do aluno</li>
+              <li>Sugere subtemas e metodologias</li>
+              <li>É <em>interrogada</em>, não apenas consultada</li>
+              <li>Oferece perspetivas alternativas a pedido</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Phase 3 -->
+    <article class="phase reveal" data-phase="3">
+      <div class="phase__marker">
+        <span class="phase__dot"></span>
+        <span class="phase__num">03</span>
+      </div>
+      <div class="phase__content">
+        <h3 class="phase__title">Construção do percurso</h3>
+        <p class="phase__sub">Objetivos próprios. Plano de estudo. Primeira validação fora da IA.</p>
+        <div class="phase__grid">
+          <div class="role role--aluno">
+            <span class="role__tag">Aluno</span>
+            <ul>
+              <li>Define objetivos específicos de aprendizagem</li>
+              <li>Estrutura um plano com tópicos e subtópicos</li>
+              <li>Identifica lacunas e reformula perguntas</li>
+              <li>Começa a validar em fontes externas</li>
+            </ul>
+          </div>
+          <div class="role role--prof">
+            <span class="role__tag">Professor</span>
+            <ul>
+              <li>Conferências individuais (5–10 min por aluno)</li>
+              <li>Verifica consistência e relevância curricular</li>
+              <li>Confirma a validação para além da IA</li>
+              <li>Feedback orientado para o processo</li>
+            </ul>
+          </div>
+          <div class="role role--ia">
+            <span class="role__tag">IA Generativa</span>
+            <ul>
+              <li>Ajuda a estruturar o plano de estudo</li>
+              <li>Sugere fontes para validação independente</li>
+              <li>Organiza ideias — não as produz</li>
+              <li>Oferece perspetivas contraditórias a pedido</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Phase 4 -->
+    <article class="phase reveal" data-phase="4">
+      <div class="phase__marker">
+        <span class="phase__dot"></span>
+        <span class="phase__num">04</span>
+      </div>
+      <div class="phase__content">
+        <h3 class="phase__title">Reflexão, ajuste e aprofundamento</h3>
+        <p class="phase__sub">A fase mais exigente. A IA é usada como ferramenta de revisão crítica.</p>
+        <div class="phase__grid">
+          <div class="role role--aluno">
+            <span class="role__tag">Aluno</span>
+            <ul>
+              <li>Revê o que aprendeu e ajusta objetivos</li>
+              <li>Aprofunda áreas de maior interesse</li>
+              <li>Compara a IA com fontes primárias</li>
+              <li>Inicia a estruturação do produto final</li>
+            </ul>
+          </div>
+          <div class="role role--prof">
+            <span class="role__tag">Professor</span>
+            <ul>
+              <li>Solicita diário de aprendizagem</li>
+              <li>Feedback sobre a qualidade das perguntas</li>
+              <li>Sinala aceitação acrítica de informação</li>
+              <li>Prepara critérios do produto final</li>
+            </ul>
+          </div>
+          <div class="role role--ia">
+            <span class="role__tag">IA Generativa</span>
+            <ul>
+              <li>Apoia a síntese e estruturação</li>
+              <li>Sugere formatos para o produto final</li>
+              <li>Usada para <em>“o que falta no meu argumento?”</em></li>
+              <li>Não produz o produto final</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Phase 5 -->
+    <article class="phase reveal" data-phase="5">
+      <div class="phase__marker">
+        <span class="phase__dot"></span>
+        <span class="phase__num">05</span>
+      </div>
+      <div class="phase__content">
+        <h3 class="phase__title">Produção, partilha e avaliação</h3>
+        <p class="phase__sub">O produto tem identidade própria. A reflexão final fecha o ciclo.</p>
+        <div class="phase__grid">
+          <div class="role role--aluno">
+            <span class="role__tag">Aluno</span>
+            <ul>
+              <li>Produz o produto final com identidade própria</li>
+              <li>Apresenta à turma ou audiência definida</li>
+              <li>Recebe e processa feedback de pares</li>
+              <li>Realiza a reflexão final sobre o processo</li>
+            </ul>
+          </div>
+          <div class="role role--prof">
+            <span class="role__tag">Professor</span>
+            <ul>
+              <li>Avalia com critérios pré-definidos e partilhados</li>
+              <li>Facilita a partilha e o feedback estruturado</li>
+              <li>Conduz a reflexão final da turma</li>
+              <li>Documenta para iterar na próxima aplicação</li>
+            </ul>
+          </div>
+          <div class="role role--ia">
+            <span class="role__tag">IA Generativa</span>
+            <ul>
+              <li>Pode apoiar a preparação da apresentação</li>
+              <li>Não é usada para produzir o produto final</li>
+              <li>Pode ser referenciada como fonte (com limitações)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- AVALIAÇÃO -->
+<section class="section" id="avaliacao">
+  <div class="section__head">
+    <span class="section__num">08</span>
+    <span class="section__kicker">Framework de avaliação</span>
+  </div>
+  <h2 class="h2 reveal">Rejeita o teste único. <em>Não rejeita a avaliação.</em></h2>
+  <p class="lede reveal">
+    Requer, pelo contrário, uma avaliação <strong>mais exigente</strong>: incide sobre o processo,
+    sobre a qualidade do pensamento demonstrado ao longo das cinco fases, e sobre o produto final
+    como evidência de construção autónoma de conhecimento.
+  </p>
+
+  <!-- Formativa -->
+  <div class="eval">
+    <div class="eval__tag">Durante o processo</div>
+    <h3 class="h3">Avaliação formativa</h3>
+    <div class="eval__grid">
+      <article class="dim reveal">
+        <h4>Qualidade das perguntas</h4>
+        <p>Perguntas com contexto e especificidade crescente. Questiona respostas da IA. Pede perspetivas alternativas.</p>
+        <span class="dim__phase">Fases 2 e 3</span>
+      </article>
+      <article class="dim reveal">
+        <h4>Autonomia e autorregulação</h4>
+        <p>Define os próprios objetivos. Revê e ajusta o percurso sem depender de validação constante.</p>
+        <span class="dim__phase">Fases 2, 3 e 4</span>
+      </article>
+      <article class="dim reveal">
+        <h4>Pensamento crítico</h4>
+        <p>Verifica em fontes externas. Identifica limitações. Distingue factos de interpretações.</p>
+        <span class="dim__phase">Fases 3 e 4</span>
+      </article>
+      <article class="dim reveal">
+        <h4>Profundidade exploratória</h4>
+        <p>Vai além das respostas de superfície. Explora subtemas com consistência. Demonstra progressão.</p>
+        <span class="dim__phase">Fase 4</span>
+      </article>
+      <article class="dim reveal">
+        <h4>Reflexividade</h4>
+        <p>Descreve o que aprendeu sobre como aprende. Identifica o que a abordagem exigiu e acrescentou.</p>
+        <span class="dim__phase">Fase 5</span>
+      </article>
+    </div>
+  </div>
+
+  <!-- Sumativa - product final - pie-style bar -->
+  <div class="eval eval--sum">
+    <div class="eval__tag">Produto final</div>
+    <h3 class="h3">Avaliação sumativa</h3>
+    <p class="muted reveal">A forma é flexível — relatório, apresentação, projeto prático, ensaio, artefacto digital. Os critérios são partilhados antes do processo começar.</p>
+
+    <div class="weights">
+      <div class="weights__bar" id="weights-bar">
+        <div class="weights__seg weights__seg--1" style="--w:30%"><span>30%</span></div>
+        <div class="weights__seg weights__seg--2" style="--w:25%"><span>25%</span></div>
+        <div class="weights__seg weights__seg--3" style="--w:25%"><span>25%</span></div>
+        <div class="weights__seg weights__seg--4" style="--w:20%"><span>20%</span></div>
+      </div>
+      <div class="weights__legend">
+        <div class="wlg wlg--1 reveal"><span class="wlg__sw"></span><strong>Consistência e profundidade</strong><p>Vai além das primeiras respostas da IA; desenvolvimento não superficial.</p></div>
+        <div class="wlg wlg--2 reveal"><span class="wlg__sw"></span><strong>Pensamento crítico</strong><p>Identifica limitações, múltiplas perspetivas, questiona em vez de descrever.</p></div>
+        <div class="wlg wlg--3 reveal"><span class="wlg__sw"></span><strong>Autonomia e originalidade</strong><p>Reconhecível como construção do aluno — não síntese automática.</p></div>
+        <div class="wlg wlg--4 reveal"><span class="wlg__sw"></span><strong>Reflexão sobre o processo</strong><p>Descreve e avalia o próprio processo — o que aprendeu sobre como aprende.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GUIÃO DO ALUNO -->
+<section class="section section--paper-alt" id="guiao">
+  <div class="section__head">
+    <span class="section__num">09</span>
+    <span class="section__kicker">Guião para alunos</span>
+  </div>
+  <h2 class="h2 reveal"><em>A diferença</em> entre usar bem e usar mal a IA.</h2>
+  <p class="lede reveal">
+    Se fazes perguntas para <em>perceber</em> ou se usas as respostas para <em>não ter de perceber</em>.
+    Essa é a linha. A IA não vai aprender por ti.
+  </p>
+
+  <div class="prompts">
+    <h3 class="h3 reveal">Três tipos de pergunta que nunca podem faltar</h3>
+    <div class="prompts__grid">
+      <article class="prompt reveal">
+        <span class="prompt__kind">Verificação</span>
+        <p class="prompt__body">“O que acabaste de me dizer é consensual ou há quem discorde? Apresenta o argumento contrário.”</p>
+      </article>
+      <article class="prompt reveal">
+        <span class="prompt__kind">Profundidade</span>
+        <p class="prompt__body">“Vai mais fundo neste ponto específico. Que mecanismos ou evidências sustentam esta afirmação?”</p>
+      </article>
+      <article class="prompt reveal">
+        <span class="prompt__kind">Fonte</span>
+        <p class="prompt__body">“Em que tipo de fontes posso verificar o que me disseste? Dá-me termos de pesquisa específicos para encontrar informação primária.”</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="rule reveal">
+    <div class="rule__meter" aria-hidden="true">
+      <div class="rule__meter-fill"></div>
+      <div class="rule__meter-tick" style="left:66.66%"></div>
+    </div>
+    <div class="rule__text">
+      <span class="rule__n">⅔</span>
+      <p>Na Fase 4, <strong>pelo menos dois terços</strong> da informação usada no produto final têm de ser validados em fontes que <em>não são a IA</em>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RISK / OFFLOADING -->
+<section class="section" id="risco">
+  <div class="section__head">
+    <span class="section__num">10</span>
+    <span class="section__kicker">Considerações práticas</span>
+  </div>
+  <h2 class="h2 reveal">O risco não é <em>usar</em> a IA. É usá-la <em>passivamente</em>.</h2>
+
+  <div class="risk-grid">
+    <article class="risk reveal">
+      <h4>Offloading cognitivo</h4>
+      <p>O aluno que copia respostas sem as processar, que usa a IA para não pensar em vez de a usar para pensar melhor.</p>
+      <p class="muted">A proteção é uma avaliação que o torna evidente: quem não processou o que aprendeu não defende o seu produto em cinco minutos de conversa.</p>
+    </article>
+    <article class="risk reveal">
+      <h4>Heterogeneidade da turma</h4>
+      <p>Mini-Brief ligeiramente mais estruturado e conferências mais frequentes para alunos com menor autonomia. Forma mais aberta para os restantes.</p>
+      <p class="muted">A estrutura da abordagem é a mesma; o nível de suporte varia.</p>
+    </article>
+    <article class="risk reveal">
+      <h4>Registo e monitorização</h4>
+      <p>Uma grelha com os cinco momentos de avaliação formativa, notas de observação e registo das conferências.</p>
+      <p class="muted">O que importa é ter evidência do <em>processo</em> — não apenas do produto.</p>
+    </article>
+    <article class="risk reveal">
+      <h4>Iteração entre aplicações</h4>
+      <p>Uma página de notas no final do processo: o que correu bem, o que falhou, que alunos tiveram mais dificuldade, que aspetos do Mini-Brief precisam de ajuste.</p>
+      <p class="muted">Não tem de ser formal. Basta tornar a próxima aplicação mais eficaz.</p>
+    </article>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="foot">
+  <div class="foot__mark">
+    <svg viewBox="0 0 24 24" width="28" height="28"><polygon points="12,3 22,20 2,20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    <span>APEX IA · v2.0</span>
+  </div>
+  <div class="foot__body">
+    <p><em>Aprendizagem Personalizada Exploratória com IA</em> — uma proposta pedagógica para a era da IA Generativa.</p>
+    <p class="muted">Marco Neves AI · 2026 · Esta abordagem pode ser partilhada e adaptada com indicação da autoria.</p>
+  </div>
+  <a href="#top" class="foot__top">Voltar ao topo <span>↑</span></a>
+</footer>
+
+<script>
+/* Hero canvas — drifting constellation / triangle mesh */
+(function () {
+  const canvas = document.getElementById('hero-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, DPR;
+  const NODES = 38;
+  const nodes = [];
+
+  function resize() {
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    const rect = canvas.getBoundingClientRect();
+    W = rect.width; H = rect.height;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+
+  function init() {
+    resize();
+    nodes.length = 0;
+    for (let i = 0; i < NODES; i++) {
+      nodes.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.18,
+        vy: (Math.random() - 0.5) * 0.18,
+        r: Math.random() * 1.4 + 0.6
+      });
+    }
+  }
+
+  // Three 'anchor' nodes form the conceptual triangle (Professor/Aluno/IA)
+  const anchors = [];
+  function setAnchors() {
+    anchors.length = 0;
+    anchors.push({ x: W * 0.5,  y: H * 0.18, label: 'P' });
+    anchors.push({ x: W * 0.88, y: H * 0.82, label: 'I' });
+    anchors.push({ x: W * 0.12, y: H * 0.82, label: 'A' });
+  }
+
+  let mouse = { x: -999, y: -999 };
+  window.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+  });
+  window.addEventListener('mouseleave', () => { mouse.x = -999; mouse.y = -999; });
+
+  window.addEventListener('resize', () => { init(); setAnchors(); });
+
+  function step() {
+    ctx.clearRect(0, 0, W, H);
+
+    // draw subtle triangle between anchors
+    ctx.save();
+    ctx.strokeStyle = 'rgba(232,71,44,0.18)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 6]);
+    ctx.beginPath();
+    ctx.moveTo(anchors[0].x, anchors[0].y);
+    ctx.lineTo(anchors[1].x, anchors[1].y);
+    ctx.lineTo(anchors[2].x, anchors[2].y);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+
+    // update + draw nodes
+    for (let i = 0; i < nodes.length; i++) {
+      const n = nodes[i];
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > W) n.vx *= -1;
+      if (n.y < 0 || n.y > H) n.vy *= -1;
+
+      // soft attraction to nearest anchor
+      let nearest = anchors[0];
+      let nd = Infinity;
+      for (const a of anchors) {
+        const d = (n.x - a.x) ** 2 + (n.y - a.y) ** 2;
+        if (d < nd) { nd = d; nearest = a; }
+      }
+      n.vx += (nearest.x - n.x) * 0.00004;
+      n.vy += (nearest.y - n.y) * 0.00004;
+
+      // mouse repulsion
+      const mdx = n.x - mouse.x, mdy = n.y - mouse.y;
+      const md2 = mdx * mdx + mdy * mdy;
+      if (md2 < 14000) {
+        const f = (14000 - md2) / 14000 * 0.08;
+        n.vx += mdx * f * 0.01; n.vy += mdy * f * 0.01;
+      }
+
+      // damp
+      n.vx *= 0.992; n.vy *= 0.992;
+
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(21,20,15,0.45)';
+      ctx.fill();
+    }
+
+    // lines between close nodes
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < 16000) {
+          const al = (1 - d2 / 16000) * 0.32;
+          ctx.strokeStyle = `rgba(21,20,15,${al})`;
+          ctx.lineWidth = 0.6;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // anchor glyphs
+    for (const a of anchors) {
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#E8472C';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, 14, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(232,71,44,0.35)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  init(); setAnchors(); step();
+})();
+
+</script>
+<script>
+/* =========================================================
+   APEX IA — Interactions
+   ========================================================= */
+
+// --- Split hero words into .word spans for staggered rise ---
+(function splitHero() {
+  document.querySelectorAll('.hero__line').forEach(line => {
+    const html = line.innerHTML;
+    // Wrap full line content in one .word so the existing CSS keyframes drive it
+    line.innerHTML = `<span class="word">${html}</span>`;
+  });
+})();
+
+// --- Generic reveal on scroll ---
+(function reveal() {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in-view');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.14, rootMargin: '0px 0px -8% 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+})();
+
+// --- Triade trigger ---
+(function triade() {
+  const stage = document.getElementById('triade-stage');
+  if (!stage) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        stage.classList.add('in-view');
+        io.disconnect();
+      }
+    });
+  }, { threshold: 0.2 });
+  io.observe(stage);
+})();
+
+// --- Checklist items animate in ---
+(function check() {
+  const items = document.querySelectorAll('.check li');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const idx = [...items].indexOf(e.target);
+        setTimeout(() => e.target.classList.add('in-view'), idx * 140);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  items.forEach(el => io.observe(el));
+})();
+
+// --- Weights bar trigger ---
+(function weights() {
+  const w = document.querySelector('.weights');
+  if (!w) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { w.classList.add('in-view'); io.disconnect(); }
+    });
+  }, { threshold: 0.3 });
+  io.observe(w);
+})();
+
+// --- Rule meter trigger ---
+(function rule() {
+  const r = document.querySelector('.rule');
+  if (!r) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { r.classList.add('in-view'); io.disconnect(); }
+    });
+  }, { threshold: 0.4 });
+  io.observe(r);
+})();
+
+// --- Phases rail: scroll-linked fill + active dot ---
+(function phaseRail() {
+  const container = document.getElementById('phases');
+  const fill = document.getElementById('rail-fill');
+  if (!container || !fill) return;
+
+  const phases = container.querySelectorAll('.phase');
+
+  function onScroll() {
+    const rect = container.getBoundingClientRect();
+    const viewH = window.innerHeight;
+    const total = rect.height;
+    const scrolled = Math.min(Math.max(viewH * 0.5 - rect.top, 0), total);
+    const pct = (scrolled / total) * 100;
+    fill.style.height = pct + '%';
+
+    // active marker: whichever phase center is nearest to viewport middle
+    let bestIdx = 0, bestDist = Infinity;
+    phases.forEach((p, i) => {
+      const r = p.getBoundingClientRect();
+      const center = r.top + r.height / 2;
+      const dist = Math.abs(center - viewH / 2);
+      if (dist < bestDist) { bestDist = dist; bestIdx = i; }
+    });
+    phases.forEach((p, i) => p.classList.toggle('active', i === bestIdx));
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+})();
+
+// --- Mini-Brief: typewriter reveal when in view ---
+(function typewriter() {
+  const card = document.getElementById('brief-card');
+  if (!card) return;
+
+  const rows = card.querySelectorAll('[data-type]');
+  rows.forEach(r => {
+    r.dataset.final = r.textContent;
+    r.textContent = '';
+  });
+
+  let started = false;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !started) {
+        started = true;
+        runType(rows, 0);
+        io.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+  io.observe(card);
+
+  function runType(list, i) {
+    if (i >= list.length) return;
+    const el = list[i];
+    const text = el.dataset.final;
+    let n = 0;
+    const speed = text.length > 40 ? 12 : 24;
+    const tick = () => {
+      n++;
+      el.textContent = text.slice(0, n);
+      if (n < text.length) setTimeout(tick, speed);
+      else setTimeout(() => runType(list, i + 1), 180);
+    };
+    tick();
+  }
+})();
+
+// --- Nav active link tracking ---
+(function navActive() {
+  const links = document.querySelectorAll('.nav__links a');
+  const map = new Map();
+  links.forEach(a => {
+    const id = a.getAttribute('href').replace('#', '');
+    const sec = document.getElementById(id);
+    if (sec) map.set(sec, a);
+  });
+  if (!map.size) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      const link = map.get(e.target);
+      if (!link) return;
+      if (e.isIntersecting) {
+        links.forEach(l => l.style.color = '');
+        link.style.color = 'var(--accent)';
+        link.style.opacity = '1';
+      }
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  map.forEach((_, sec) => io.observe(sec));
+})();
+
+</script>
+</body>
+</html>
